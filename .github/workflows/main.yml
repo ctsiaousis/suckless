@@ -1,0 +1,32 @@
+name: Main CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+      with:
+        ref: master
+
+    - name: Install compilation dependencies
+      run: sudo apt-get install libx11-dev libyajl-dev libxinerama-dev
+      
+    
+    - name: Compile DWM
+      run: cd ./dwm && make
+      
+    - name: Compile ST
+      run: cd ./st && makee
+      
+    - name: Compile DWMblocks
+      run: cd ./dwmblocks && make
+      

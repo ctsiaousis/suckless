@@ -18,15 +18,22 @@ jobs:
         ref: master
 
     - name: Install compilation dependencies
-      run: sudo apt-get install libx11-dev libyajl-dev libxinerama-dev
+      id: Apt-Install
+      run: sudo apt-get install libx11-dev libyajl-dev libxinerama-dev || echo ::set-output name=status::failure
       
     
     - name: Compile DWM
-      run: cd ./dwm && make
+      id: dwm
+      run: cd ./dwm && make || echo ::set-output name=status::failure
+      continue-on-error: true
       
     - name: Compile ST
-      run: cd ./st && makee
+      id: st
+      run: cd ./st && makee || echo ::set-output name=status::failure
+      continue-on-error: true
       
     - name: Compile DWMblocks
-      run: cd ./dwmblocks && make
+      id: dwmblocks
+      run: cd ./dwmblocks && make || echo ::set-output name=status::failure
+      continue-on-error: true
       

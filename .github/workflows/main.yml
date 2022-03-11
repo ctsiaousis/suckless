@@ -19,7 +19,11 @@ jobs:
 
     - name: Install compilation dependencies
       id: Apt-Install
-      run: sudo apt-get install libx11-dev libyajl-dev libxinerama-dev xcb libxcb-xkb-dev x11-xkb-utils libx11-xcb-dev libxkbcommon-x11-dev libxcb-res0-dev
+      run: |
+        sudo apt-get install libx11-dev libyajl-dev libxinerama-dev xcb \
+        libxcb-xkb-dev x11-xkb-utils libx11-xcb-dev libxkbcommon-x11-dev \
+        libxcb-res0-dev libfreetype6-dev libglib2.0-dev libcairo2-dev \
+        libharfbuzz-dev
       
     
     - name: Compile DWM

@@ -28,16 +28,16 @@ jobs:
     
     - name: Compile DWM
       id: dwm
-      run: cd ./dwm && make || echo ::set-output name=status::failure
-      continue-on-error: true
+      run: cd ./dwm && make
+#       continue-on-error: true
       
     - name: Compile ST
       id: st
-      run: cd ./st && make || echo ::set-output name=status::failure
-      continue-on-error: true
+      run: cd ./st && make
+#       continue-on-error: true
       
     - name: Compile DWMblocks
       id: dwmblocks
-      run: cd ./dwmblocks && make || echo ::set-output name=status::failure
-      continue-on-error: true
+      run: cd ./dwmblocks && make
+#       continue-on-error: true
       

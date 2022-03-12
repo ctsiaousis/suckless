@@ -1,0 +1,43 @@
+name: Main CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+      with:
+        ref: master
+
+    - name: Install compilation dependencies
+      id: Apt-Install
+      run: |
+        sudo apt-get install libx11-dev libyajl-dev libxinerama-dev xcb \
+        libxcb-xkb-dev x11-xkb-utils libx11-xcb-dev libxkbcommon-x11-dev \
+        libxcb-res0-dev libfreetype6-dev libglib2.0-dev libcairo2-dev \
+        libharfbuzz-dev
+      
+    
+    - name: Compile DWM
+      id: dwm
+      run: cd ./dwm && make
+#       continue-on-error: true
+      
+    - name: Compile ST
+      id: st
+      run: cd ./st && make
+#       continue-on-error: true
+      
+    - name: Compile DWMblocks
+      id: dwmblocks
+      run: cd ./dwmblocks && make
+#       continue-on-error: true
+      

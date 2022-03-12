@@ -28,10 +28,12 @@ static char normfgcolor[] = "#bbbbbb";
 static char selfgcolor[] = "#eeeeee";
 static char selbordercolor[] = "#770000";
 static char selbgcolor[] = "#005577";
+static char hiddencolor[] = "#303030";
 static char *colors[][3] = {
     /*               fg           bg           border   */
     [SchemeNorm] = {normfgcolor, normbgcolor, normbordercolor},
     [SchemeSel] = {selfgcolor, selbgcolor, selbordercolor},
+    [SchemeHid] = {hiddencolor, normbgcolor, hiddencolor},
 };
 
 typedef struct {
@@ -151,17 +153,18 @@ static Key keys[] = {
     STACKKEYS(MODKEY, focus) STACKKEYS(MODKEY | ShiftMask, push)
     /* { MODKEY|ShiftMask,		XK_Escape,	spawn,	SHCMD("") }, */
     {MODKEY, XK_grave, spawn, SHCMD("dmenuunicode")},
-    /* { MODKEY|ShiftMask,		XK_grave,	togglescratch,	SHCMD("") },*/
+    /* { MODKEY|ShiftMask,		XK_grave,	togglescratch,	SHCMD("")
+       },*/
     TAGKEYS(XK_1, 0) TAGKEYS(XK_2, 1) TAGKEYS(XK_3, 2) TAGKEYS(XK_4, 3)
-    TAGKEYS(XK_5, 4) TAGKEYS(XK_6, 5) TAGKEYS(XK_7, 6) TAGKEYS(XK_8, 7)
-    TAGKEYS(XK_9, 8)
-	{MODKEY, 				XK_0, 		view, 		{.ui = ~0}},
-    {MODKEY | ShiftMask, 	XK_0, 		tag, 		{.ui = ~0}},
-    {MODKEY, 				XK_minus, 	spawn, 		SHCMD("pamixer --allow-boost "
-													"-d 5; kill -44 $(pidof dwmblocks)")},
-    {MODKEY | ShiftMask, 	XK_minus, 	spawn,
+        TAGKEYS(XK_5, 4) TAGKEYS(XK_6, 5) TAGKEYS(XK_7, 6) TAGKEYS(XK_8, 7)
+            TAGKEYS(XK_9, 8){MODKEY, XK_0, view, {.ui = ~0}},
+    {MODKEY | ShiftMask, XK_0, tag, {.ui = ~0}},
+    {MODKEY, XK_minus, spawn,
+     SHCMD("pamixer --allow-boost "
+           "-d 5; kill -44 $(pidof dwmblocks)")},
+    {MODKEY | ShiftMask, XK_minus, spawn,
      SHCMD("pamixer --allow-boost -d 15; kill -44 $(pidof dwmblocks)")},
-    {MODKEY, 				XK_equal, 	spawn,
+    {MODKEY, XK_equal, spawn,
      SHCMD("pamixer --allow-boost -i 5; kill -44 $(pidof dwmblocks)")},
     {MODKEY | ShiftMask, XK_equal, spawn,
      SHCMD("pamixer --allow-boost -i 15; kill -44 $(pidof dwmblocks)")},
@@ -169,7 +172,8 @@ static Key keys[] = {
     {MODKEY | ShiftMask, XK_BackSpace, spawn, SHCMD("sysact")},
 
     {MODKEY, XK_Tab, view, {0}},
-    /* { MODKEY|ShiftMask,		XK_Tab,		spawn,		SHCMD("") },
+    /* { MODKEY|ShiftMask,		XK_Tab,		spawn,		SHCMD("")
+     * },
      */
     {MODKEY, XK_q, killclient, {0}},
     {MODKEY | ShiftMask, XK_q, spawn, SHCMD("sysact")},
@@ -202,13 +206,15 @@ static Key keys[] = {
     {MODKEY, XK_bracketright, spawn, SHCMD("mpc seek +10")},
     {MODKEY | ShiftMask, XK_bracketright, spawn, SHCMD("mpc seek +60")},
     {MODKEY, XK_backslash, view, {0}},
-    /* { MODKEY|ShiftMask,		XK_backslash,		spawn,		SHCMD("") },
+    /* { MODKEY|ShiftMask,		XK_backslash,		spawn,		SHCMD("")
+     * },
      */
 
     {MODKEY, XK_a, togglegaps, {0}},
     {MODKEY | ShiftMask, XK_a, defaultgaps, {0}},
     {MODKEY, XK_s, togglesticky, {0}},
-    /* { MODKEY|ShiftMask,		XK_s,		spawn,		SHCMD("") },
+    /* { MODKEY|ShiftMask,		XK_s,		spawn,		SHCMD("")
+     * },
      */
     {MODKEY, XK_d, spawn, SHCMD("dmenu_run")},
     {MODKEY | ShiftMask, XK_d, spawn, SHCMD("passmenu")},
@@ -222,24 +228,31 @@ static Key keys[] = {
     {MODKEY, XK_semicolon, shiftview, {.i = 1}},
     {MODKEY | ShiftMask, XK_semicolon, shifttag, {.i = 1}},
     {MODKEY, XK_apostrophe, togglescratch, {.ui = 1}},
-    /* { MODKEY|ShiftMask,		XK_apostrophe,	spawn,		SHCMD("") },
+    /* { MODKEY|ShiftMask,		XK_apostrophe,	spawn,		SHCMD("")
+     * },
      */
     {MODKEY | ShiftMask, XK_apostrophe, togglesmartgaps, {0}},
     {MODKEY, XK_Return, spawn, {.v = termcmd}},
     {MODKEY | ShiftMask, XK_Return, togglescratch, {.ui = 0}},
 
     {MODKEY, XK_z, incrgaps, {.i = +3}},
-    /* { MODKEY|ShiftMask,		XK_z,		spawn,		SHCMD("") },
+    /* { MODKEY|ShiftMask,		XK_z,		spawn,		SHCMD("")
+     * },
      */
     {MODKEY, XK_x, incrgaps, {.i = -3}},
-    /* { MODKEY|ShiftMask,		XK_x,		spawn,		SHCMD("") },*/
-    /* { MODKEY,			XK_c,		spawn,		SHCMD("") },*/
-    /* { MODKEY|ShiftMask,		XK_c,		spawn,		SHCMD("") },*/
+    /* { MODKEY|ShiftMask,		XK_x,		spawn,		SHCMD("")
+       },*/
+    /* { MODKEY,			XK_c,		spawn,		SHCMD("")
+       },*/
+    /* { MODKEY|ShiftMask,		XK_c,		spawn,		SHCMD("")
+       },*/
     /* V is automatically bound above in STACKKEYS */
-    /* { MODKEY|ShiftMask,		XK_b,		spawn,		SHCMD("") },*/
+    /* { MODKEY|ShiftMask,		XK_b,		spawn,		SHCMD("")
+       },*/
     {MODKEY, XK_b, togglebar, {0}},
-    {MODKEY, XK_n, 				spawn, SHCMD(TERMINAL " -e nvim -c VimwikiIndex")},
-    {MODKEY | ShiftMask, XK_n, 	spawn, SHCMD(TERMINAL " -e newsboat; pkill -RTMIN+6 dwmblocks")},
+    {MODKEY, XK_n, spawn, SHCMD(TERMINAL " -e nvim -c VimwikiIndex")},
+    {MODKEY | ShiftMask, XK_n, spawn,
+     SHCMD(TERMINAL " -e newsboat; pkill -RTMIN+6 dwmblocks")},
     {MODKEY, XK_m, spawn, SHCMD(TERMINAL " -e ncmpcpp")},
     {MODKEY | ShiftMask, XK_m, spawn,
      SHCMD("pamixer -t; kill -44 $(pidof dwmblocks)")},
@@ -267,7 +280,8 @@ static Key keys[] = {
     {MODKEY, XK_F3, spawn, SHCMD("displayselect")},
     {MODKEY, XK_F4, spawn,
      SHCMD(TERMINAL " -e pulsemixer; kill -44 $(pidof dwmblocks)")},
-    /* { MODKEY,			XK_F5,		xrdb,		{.v = NULL } },
+    /* { MODKEY,			XK_F5,		xrdb,		{.v = NULL }
+     * },
      */
     {MODKEY, XK_F6, spawn, SHCMD("torwrap")},
     {MODKEY, XK_F7, spawn, SHCMD("td-toggle")},
@@ -369,6 +383,7 @@ static Button buttons[] = {
  */
 #ifndef __OpenBSD__
     {ClkWinTitle, 0, Button2, zoom, {0}},
+    {ClkWinTitle, 0, Button1, togglewin, {0}}, //is it always 0?
     {ClkStatusText, 0, Button1, sigdwmblocks, {.i = 1}},
     {ClkStatusText, 0, Button2, sigdwmblocks, {.i = 2}},
     {ClkStatusText, 0, Button3, sigdwmblocks, {.i = 3}},

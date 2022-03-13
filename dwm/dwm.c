@@ -357,6 +357,7 @@ static void (*handler[LASTEvent])(XEvent *) = {
     [MotionNotify] = motionnotify,
     [PropertyNotify] = propertynotify,
     [UnmapNotify] = unmapnotify};
+
 static Atom wmatom[WMLast], netatom[NetLast];
 static int restart = 0;
 static int running = 1;
@@ -597,10 +598,11 @@ void buttonpress(XEvent *e) {
       arg.ui = 1 << i;
     } else if (ev->x < x + blw)
       click = ClkLtSymbol;
-    else if (ev->x > (x = selmon->ww - TEXTW(stext) + lrpad)) {
+    else if (ev->x > (x = selmon->ww - TEXTW(stext) + lrpad - 2)) {
       click = ClkStatusText;
 
       char *text = rawstext;
+
       int i = -1;
       char ch;
       dwmblockssig = 0;
@@ -619,15 +621,20 @@ void buttonpress(XEvent *e) {
       }
     } else {
       // click = ClkWinTitle;
-      x += blw;
+      x = blw;
       c = m->clients;
+      // c = m->sel;
 
       if (c) {
         do {
-          if (!ISVISIBLE(c))
-            continue;
-          else
-            x += (1.0 / (double)m->bt) * m->btw;
+          // fprintf(stderr,
+          //         "inPress name: %s, bt: %d, btw: %d, "
+          //         "x: %d, ev->x: %d\n",
+          //         c->name, m->bt, m->btw, x, ev->x);
+          //// if (!ISVISIBLE(c))
+          ////   continue;
+          //// else
+          x += (1.0 / (double)m->bt) * m->btw;
         } while (ev->x > x && (c = c->next));
 
         click = ClkWinTitle;
@@ -710,9 +717,9 @@ void clientmessage(XEvent *e) {
   if (cme->message_type == netatom[NetWMState]) {
     if (cme->data.l[1] == netatom[NetWMFullscreen] ||
         cme->data.l[2] == netatom[NetWMFullscreen])
-      setfullscreen(c, (cme->data.l[0] == 1 /* _NET_WM_STATE_ADD    */
-                        || (cme->data.l[0] == 2 /* _NET_WM_STATE_TOGGLE */ &&
-                            !c->isfullscreen)));
+      setfullscreen(c, (cme->data.l[0] == 1     /* _NET_WM_STATE_ADD    */
+                        || (cme->data.l[0] == 2 /* _NET_WM_STATE_TOGGLE */
+                            && !c->isfullscreen)));
   } else if (cme->message_type == netatom[NetActiveWindow]) {
     if (c != selmon->sel && !c->isurgent)
       seturgent(c, 1);
@@ -931,10 +938,10 @@ void drawbar(Monitor *m) {
 
   if ((w = m->ww - tw - x) > bh) {
     // if (m->sel) {
-    // 	drw_setscheme(drw, scheme[m == selmon ? SchemeSel : SchemeNorm]);
-    // 	drw_text(drw, x, 0, w, bh, lrpad / 2, m->sel->name, 0);
-    // 	if (m->sel->isfloating)
-    // 		drw_rect(drw, x + boxs, boxs, boxw, boxw, m->sel->isfixed, 0);
+    //  drw_setscheme(drw, scheme[m == selmon ? SchemeSel : SchemeNorm]);
+    //  drw_text(drw, x, 0, w, bh, lrpad / 2, m->sel->name, 0);
+    //  if (m->sel->isfloating)
+    //          drw_rect(drw, x + boxs, boxs, boxw, boxw, m->sel->isfixed, 0);
     if (n > 0) {
       int remainder = w % n;
       int tabw = (1.0 / (double)n) * w + 1;
@@ -1064,16 +1071,16 @@ void focusmon(const Arg *arg) {
 // void
 // focusstack(const Arg *arg)
 // {
-// 	int i = stackpos(arg);
-// 	Client *c, *p;
+//      int i = stackpos(arg);
+//      Client *c, *p;
 
-// 	if (i < 0 || !selmon->sel || selmon->sel->isfullscreen)
-// 		return;
+//      if (i < 0 || !selmon->sel || selmon->sel->isfullscreen)
+//              return;
 
-// 	for(p = NULL, c = selmon->clients; c && (i || !ISVISIBLE(c));
-// 	    i -= ISVISIBLE(c) ? 1 : 0, p = c, c = c->next);
-// 	focus(c ? c : p);
-// 	restack(selmon);
+//      for(p = NULL, c = selmon->clients; c && (i || !ISVISIBLE(c));
+//          i -= ISVISIBLE(c) ? 1 : 0, p = c, c = c->next);
+//      focus(c ? c : p);
+//      restack(selmon);
 // }
 void focusstackvis(const Arg *arg) { focusstack(arg->i, 0); }
 
@@ -1585,8 +1592,12 @@ void showwin(Client *c) {
   setclientstate(c, NormalState);
   arrange(c->mon);
 }
+
 void togglewin(const Arg *arg) {
   Client *c = (Client *)arg->v;
+
+  // fprintf(stderr, "togglewin %s :: %d , is Hidden %d\n", c->name,
+  //         (c == selmon->sel), HIDDEN(c));
 
   if (c == selmon->sel) {
     hidewin(c);
@@ -2646,6 +2657,7 @@ void load_xresources(void) {
     resource_load(db, p->name, p->type, p->dst);
   XCloseDisplay(display);
 }
+
 void roundCorners(Client *c) {
   Window w = c->win;
   XWindowAttributes wa;

@@ -260,6 +260,9 @@ static void movemouse(const Arg *arg);
 static Client *nexttiled(Client *c);
 static void pop(Client *);
 static void propertynotify(XEvent *e);
+static void reparentnotify(
+    XEvent *e); /////////////////////////////////////////////check
+                ///https://github.com/polachok/echinus/blob/master/echinus.c
 static void pushstack(const Arg *arg);
 static void quit(const Arg *arg);
 static Monitor *recttomon(int x, int y, int w, int h);
@@ -356,6 +359,7 @@ static void (*handler[LASTEvent])(XEvent *) = {
     [MapRequest] = maprequest,
     [MotionNotify] = motionnotify,
     [PropertyNotify] = propertynotify,
+    [ReparentNotify] = reparentnotify,
     [UnmapNotify] = unmapnotify};
 
 static Atom wmatom[WMLast], netatom[NetLast];
@@ -1349,6 +1353,7 @@ void manage(Window w, XWindowAttributes *wa) {
   wc.border_width = c->bw;
   XConfigureWindow(dpy, w, CWBorderWidth, &wc);
   XSetWindowBorder(dpy, w, scheme[SchemeNorm][ColBorder].pixel);
+
   configure(c); /* propagates border_width, if size doesn't change */
   updatewindowtype(c);
   updatesizehints(c);
@@ -1561,6 +1566,15 @@ void propertynotify(XEvent *e) {
   }
 }
 
+void reparentnotify(XEvent *e) {
+  Client *c;
+  XReparentEvent *ev = &e->xreparent;
+
+  // if ((c = getclient(ev->window, clients, ClientWindow)))
+  // 	if (ev->parent != c->frame)
+  // 		unmanage(c);
+}
+
 void quit(const Arg *arg) {
   if (arg->i)
     restart = 1;
@@ -1640,6 +1654,21 @@ void resizeclient(Client *c, int x, int y, int w, int h) {
   c->oldh = c->h;
   c->h = wc.height = h;
   wc.border_width = c->bw;
+  if (((nexttiled(c->mon->clients) == c && !nexttiled(c->next)) ||
+       &monocle == c->mon->lt[c->mon->sellt]->arrange) &&
+      !c->isfullscreen && !c->isfloating) {
+    c->w = wc.width += c->bw * 2;
+    c->h = wc.height += c->bw * 2;
+    wc.border_width = 0;
+  }
+  if (!c->isfullscreen) {
+    c->x = wc.x = x + c->bw;
+    c->y = wc.y = y + c->bw;
+    c->w = wc.width - c->bw;
+    wc.width = c->w;
+    c->h = wc.height - c->bw;
+    wc.height = c->h;
+  }
   XConfigureWindow(dpy, c->win, CWX | CWY | CWWidth | CWHeight | CWBorderWidth,
                    &wc);
   configure(c);
@@ -2667,10 +2696,10 @@ void roundCorners(Client *c) {
   if (!XGetWindowAttributes(dpy, w, &wa))
     return;
 
-  int width = borderpx * 2 + wa.width;
-  int height = borderpx * 2 + wa.height;
-  /* int width = win_attr.border_width * 2 + win_attr.width; */
-  /* int height = win_attr.border_width * 2 + win_attr.height; */
+  // int width = borderpx * 2 + wa.width;
+  // int height = borderpx * 2 + wa.height;
+  int width = wa.border_width * 2 + wa.width;
+  int height = wa.border_width * 2 + wa.height;
   int rad = cornerrad * (1 - c->isfullscreen); // config_theme_cornerradius;
   int dia = 2 * rad;
 
@@ -2693,7 +2722,7 @@ void roundCorners(Client *c) {
   XSetForeground(dpy, shape_gc, 0);
   XFillRectangle(dpy, mask, shape_gc, 0, 0, width, height);
   XSetForeground(dpy, shape_gc, 1);
-  XFillArc(dpy, mask, shape_gc, 0, 0, dia, dia, 0, 23040);
+  XFillArc(dpy, mask, shape_gc, 0, 0, dia, dia, 0, 23040); // 360*64 -> circle
   XFillArc(dpy, mask, shape_gc, width - dia - 1, 0, dia, dia, 0, 23040);
   XFillArc(dpy, mask, shape_gc, 0, height - dia - 1, dia, dia, 0, 23040);
   XFillArc(dpy, mask, shape_gc, width - dia - 1, height - dia - 1, dia, dia, 0,
